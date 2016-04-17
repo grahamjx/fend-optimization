@@ -6,7 +6,7 @@ var gulp = require('gulp'),
     replace = require('gulp-html-replace')
     rename = require('gulp-rename');
 
-gulp.task('start', ['scripts', 'styles','html']);
+gulp.task('start', ['scripts', 'styles','html','serve']);
 
 gulp.task('scripts', function(){
   gulp.src('src/js/*.js')
@@ -51,8 +51,11 @@ gulp.task('styles', function(){
 gulp.task('html', function(){
   gulp.src('src/*.html')
     .pipe(replace({
-      'css': ['css/style.min.css', 'css/print.min.css'],
-      'js': 'js/perfmatters.min.js'
+      'css': ['css/style.min.css','<link rel="stylesheet" href="css/print.min.css"media="print">'],
+      'js': {
+        src: 'js/perfmatters.min.js',
+        tpl: '<script async src="%s"></script>'
+      }
     }))
     .pipe(htmlmin())
     .pipe(htmlmin({collapseWhitespace: true}))
@@ -61,7 +64,7 @@ gulp.task('html', function(){
   gulp.src('src/views/*.html')
     .pipe(replace({
       'css': ['css/style.min.css', 'css/print.min.css'],
-      'js': 'js/perfmatters.min.js'
+      'js': 'main.min.js'
     }))
     .pipe(htmlmin())
     .pipe(htmlmin({collapseWhitespace: true}))
