@@ -63,8 +63,8 @@ gulp.task('html', function(){
 
   gulp.src('src/views/*.html')
     .pipe(replace({
-      'css': ['css/style.min.css', 'css/print.min.css'],
-      'js': 'main.min.js'
+      'css': ['css/style.min.css', 'css/bootstrap-grid.min.css'],
+      //'js': 'js/main.min.js'
     }))
     .pipe(htmlmin())
     .pipe(htmlmin({collapseWhitespace: true}))
