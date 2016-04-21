@@ -62,7 +62,7 @@ gulp.task('styles', function(){
 gulp.task('html', function(){
   gulp.src('src/*.html')
     .pipe(replace({
-      'css': ['css/style.min.css','<link rel="stylesheet" href="css/print.min.css"media="print">'],
+      'css': '<link rel="stylesheet" href="css/print.min.css"media="print">',
       'js': {
         src: 'js/perfmatters.min.js',
         tpl: '<script async src="%s"></script>'
