@@ -34,7 +34,7 @@ The goal for this part of the project is to optimize the provided index.html so 
 
 The pizzeria site should be optimized to run at 60FPS while scrolling. In addition, changing the pizza size should not cause the browser to freeze and produce any noticeable 'jank'.
 
-* Problem 1: updatePositions
+* __Problem 1: updatePositions__
 
       The first major problem was that the browser was taking way to long to animate the frames
       when scrolling with the app. As you scroll, the small pizzas move in a sudo-random pattern.
@@ -61,7 +61,7 @@ The pizzeria site should be optimized to run at 60FPS while scrolling. In additi
             items[i].style.left = items[i].basicLeft + 100 * phase[i%5] + 'px'; //adjust styles
       }
       ```
-* Problem 2: resizePizzas
+* __Problem 2: resizePizzas__
 
       Through a series of tests using console.log and trial and error, I was able to
       identify more patterns in the way the elements were being modified. oldSize
