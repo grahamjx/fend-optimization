@@ -452,13 +452,13 @@ var resizePizzas = function(size) {
 
    /* This function has been heavily modified from it's original implementation
 
-      Through a series of tests using console.log and trail and error, I was able to
+      Through a series of tests using console.log and trial and error, I was able to
       identify more patterns in the way the elements were being modified. oldSize
       was originally being calculated using calls to an elements offsetWidth property.
       This causes re-flow issues and various perfomance problems. Eventually, it can be
       simplified that the PIZZA_WIDTH (offsetWidth value) doesn't actually change
       once the elements are added to the DOM on page load. Since the size starts
-      at set point, you can log that value and use it in a constant like I've done here. */
+      at set point, you can log that value and use it as a constant like I've done here. */
 
   function determineDx (size) {
     // Changes the slider value to a percent width
@@ -466,13 +466,10 @@ var resizePizzas = function(size) {
     switch (size) {
       case "1":
         return newSize = ((0.25 - OLD_SIZE) * PIZZA_WIDTH) + PIZZA_WIDTH + 'px';
-        //return 0.25;
       case "2":
         return newSize = ((0.3333 - OLD_SIZE) * PIZZA_WIDTH) + PIZZA_WIDTH + 'px';
-        //return 0.3333;
       case "3":
         return newSize = ((0.5 - OLD_SIZE) * PIZZA_WIDTH) + PIZZA_WIDTH + 'px';
-        //return 0.5;
       default:
         console.log("bug in sizeSwitcher");
     }
