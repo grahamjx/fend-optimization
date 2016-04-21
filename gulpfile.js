@@ -1,12 +1,23 @@
 var gulp = require('gulp'),
-    gls = require('gulp-live-server'),
+    ngrok = require('ngrok'),
+    connect = require('gulp-connect'),
     uglify = require('gulp-uglify'),
     csso = require('gulp-csso'),
     htmlmin = require('gulp-htmlmin')
     replace = require('gulp-html-replace')
     rename = require('gulp-rename');
+    site = '';
 
-gulp.task('start', ['scripts', 'styles','html','serve']);
+gulp.task('build', ['images','scripts', 'styles','html']);
+gulp.task('serve',['build','connect','ngrok-url']);
+
+gulp.task('images',function(){
+  gulp.src('src/img/*')
+    .pipe(gulp.dest('./dist/img'));
+
+  gulp.src('src/views/images/*')
+    .pipe(gulp.dest('./dist/views/images'));
+});
 
 gulp.task('scripts', function(){
   gulp.src('src/js/*.js')
@@ -18,14 +29,14 @@ gulp.task('scripts', function(){
     }))
     .pipe(gulp.dest('./dist'));
 
-    gulp.src('src/views/js/*.js')
-      .pipe(uglify())
-      .pipe(rename(function(path) {
-        path.dirname += "/views/js";
-        path.basename += ".min";
-        path.extname = ".js"
-      }))
-      .pipe(gulp.dest('./dist'));
+  gulp.src('src/views/js/*.js')
+    .pipe(uglify())
+    .pipe(rename(function(path) {
+      path.dirname += "/views/js";
+      path.basename += ".min";
+      path.extname = ".js"
+    }))
+    .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('styles', function(){
@@ -39,13 +50,13 @@ gulp.task('styles', function(){
     .pipe(gulp.dest('./dist'));
 
   gulp.src('src/views/css/*.css')
-  .pipe(csso())
-  .pipe(rename(function(path) {
-    path.dirname += "/views/css";
-    path.basename += ".min";
-    path.extname = ".css"
-  }))
-  .pipe(gulp.dest('./dist'));
+    .pipe(csso())
+    .pipe(rename(function(path) {
+      path.dirname += "/views/css";
+      path.basename += ".min";
+      path.extname = ".css"
+    }))
+    .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('html', function(){
@@ -64,23 +75,23 @@ gulp.task('html', function(){
   gulp.src('src/views/*.html')
     .pipe(replace({
       'css': ['css/style.min.css', 'css/bootstrap-grid.min.css'],
-      //'js': 'js/main.min.js'
+      'js': 'js/main.min.js'
     }))
     .pipe(htmlmin())
     .pipe(htmlmin({collapseWhitespace: true}))
     .pipe(gulp.dest('./dist/views/'));
 });
 
-gulp.task('dev', function(){
-  var server = gls.static('src',8000)
-  server.start();
-
-  gulp.watch(['src/css/*.css', 'src/*.html'], function (file) {
-    server.notify.apply(server, [file]);
+gulp.task('connect', function() {
+  connect.server({
+    root: 'dist',
+    port: 8000,
   });
 });
 
-gulp.task('serve', function(){
-  var server = gls.static('dist',8000)
-  server.start();
+gulp.task('ngrok-url', function() {
+  return ngrok.connect(8000, function (err, url) {
+    site = url;
+    console.log('serving your tunnel from: ' + site);
+  });
 });

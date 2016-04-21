@@ -1,4 +1,26 @@
 /*
+
+This file contains the main javapscript that runs on the Pizzeria website.
+This project is provided to Udacity students in order to optimize a site so that
+it runs at 60FPS and that certain user input (changing pizza size) doesn't cause
+the page to freeze up and cause "jank".
+
+The majority of code written here is provided by Udacity. There were two major problem
+areas in the original project. I will outline them below and give a description of how
+I solved them accordingly.
+
+Problem 1: See - updatePositions - Line 541
+
+Problem 2: See - resizePizzas - Line 424
+
+Global Variables / Additional Comments: See - Line 602
+
+By: Joel Graham
+
+**All other comments and code are written and provided by Udacity**
+
+-------------------------------------------------------------------------------
+
 Welcome to the 60fps project! Your goal is to make Cam's Pizzeria website run
 jank-free at 60 frames per second.
 
@@ -399,7 +421,13 @@ var pizzaElementGenerator = function(i) {
   return pizzaContainer;
 };
 
-// resizePizzas(size) is called when the slider in the "Our Pizzas" section of the website moves.
+/* resizePizzas(size) is called when the slider in the "Our Pizzas" section of the website moves.
+
+   Details of the changes I have made are found in:
+      determineDx
+      changePizzaSizes
+*/
+
 var resizePizzas = function(size) {
   window.performance.mark("mark_start_resize");   // User Timing API function
 
@@ -407,7 +435,7 @@ var resizePizzas = function(size) {
   function changeSliderLabel(size) {
     switch(size) {
       case "1":
-        document.getElementById("pizzaSize").innerHTML = "Small";
+        document.getElementById("pizzaSize").innerHTML = "Small"; //Updated to use getElementById instead of querySelector
         return;
       case "2":
         document.getElementById("pizzaSize").innerHTML = "Medium";
@@ -422,34 +450,43 @@ var resizePizzas = function(size) {
 
   changeSliderLabel(size);
 
-   // Returns the size difference to change a pizza element from one size to another. Called by changePizzaSizes(size).
+   /* This function has been heavily modified from it's original implementation
+
+      Through a series of tests using console.log and trail and error, I was able to
+      identify more patterns in the way the elements were being modified. oldSize
+      was originally being calculated using calls to an elements offsetWidth property.
+      This causes re-flow issues and various perfomance problems. Eventually, it can be
+      simplified that the PIZZA_WIDTH (offsetWidth value) doesn't actually change
+      once the elements are added to the DOM on page load. Since the size starts
+      at set point, you can log that value and use it in a constant like I've done here. */
+
   function determineDx (size) {
     // Changes the slider value to a percent width
-    var oldSize = pizzaWidth / windowWidth;
     var newSize = 0;
     switch (size) {
       case "1":
-        return newSize = ((0.25 - oldSize) * pizzaWidth) + pizzaWidth + 'px';
+        return newSize = ((0.25 - OLD_SIZE) * PIZZA_WIDTH) + PIZZA_WIDTH + 'px';
         //return 0.25;
       case "2":
-        return newSize = ((0.3333 - oldSize) * pizzaWidth) + pizzaWidth + 'px';
+        return newSize = ((0.3333 - OLD_SIZE) * PIZZA_WIDTH) + PIZZA_WIDTH + 'px';
         //return 0.3333;
       case "3":
-        return newSize = ((0.5 - oldSize) * pizzaWidth) + pizzaWidth + 'px';
+        return newSize = ((0.5 - OLD_SIZE) * PIZZA_WIDTH) + PIZZA_WIDTH + 'px';
         //return 0.5;
       default:
         console.log("bug in sizeSwitcher");
     }
-    pizzaWidth = newSize;
   }
 
-  // Iterates through pizza elements on the page and changes their widths
+  /* Iterates through pizza elements on the page and changes their widths
+
+     Since most of the "heavily lifting" as it were is done by determineDx, this
+     function simply grabs the newWidth and the iterates through the pizzaBox array
+     adjusting the style accordingly. */
+
   function changePizzaSizes(size) {
     var newWidth = determineDx(size);
-    //var newWidth = (pizzaBox[0].offsetWidth + dx) + 'px';
-    //console.log(newWidth);
-
-    for (var i = 0; i < pizzaBoxSize; i++) {
+    for (var i = 0; i < PIZZA_BOX_SIZE; i++) {
       pizzaBox[i].style.width = newWidth;
     }
   }
@@ -494,20 +531,47 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 // The following code for sliding background pizzas was pulled from Ilya's demo found at:
 // https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
 
-// Moves the sliding background pizzas based on scroll position
+/* Moves the sliding background pizzas based on scroll position
+
+Problem 1: updatePositions
+
+The first major problem was that the browser was taking way to long to animate the frames
+when scrolling with the app. As you scroll, the small pizzas move in a sudo-random pattern.
+I changed the total number of pizzas (TOTAL_PIZZA) to render on load. Originally, it was loading
+and adding 200 pizzas to the DOM. The user doesn't see all 200 pizzas however, as each time
+they scroll, the position is adjusted. At any one time there is a maximum of 32 little pizzas
+that are visible and need of animation. This is set to a new constant TOTAL_PIZZA.
+
+I then heavily modified the for loop inside updatePositions so that calls to the DOM were
+greatly reduced. First I changed the DOM call from querySelector to getElementsByClassName
+since it is a more efficient call.
+
+After examining the for loop using console.log, you can see a pattern in the output.
+Specifically in the original modulus operation (i % 5). So I pulled the Math.sin
+call out of the original loop and pushed the new values into an array to hold each
+of these five values.
+
+Finally I iterate though all the pizzas stored in items and update their style accordingly.
+
+To reduce the number of DOM calls even futher, I created a local variable scrollLocation
+that keeps track of the users scroll position. In the orginal version of the function, it would
+do a DOM call body.scrollTop to find the current position. This created re-flow issues.
+Since the page always loads wiith scrollTop equal to zero (top of the page), I instead used a global variable
+that tracks changes in scroll and is adjusted after each call to updatePositions.*/
+
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  var items = document.getElementsByClassName('mover');
+  var items = document.getElementsByClassName('mover'); //grabs all the small pizza elements
   var phase = [];
 
   for (var i = 0; i < 5; i++) {
-    phase.push(Math.sin((scrollLocation / 1250)+i));
+    phase.push(Math.sin((scrollLocation / 1250)+i)); //stores the new values in the array
   }
 
-  for (var i = 0; i < TOTALPIZZA; i++) {
-    items[i].style.left = items[i].basicLeft + 100 * phase[i%5] + 'px';
+  for (var i = 0; i < TOTAL_PIZZA; i++) {
+    items[i].style.left = items[i].basicLeft + 100 * phase[i%5] + 'px'; //adjust styles
   }
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
@@ -518,7 +582,7 @@ function updatePositions() {
     var timesToUpdatePosition = window.performance.getEntriesByName("measure_frame_duration");
     logAverageFrame(timesToUpdatePosition);
   }
-  scrollLocation += 100;
+  scrollLocation += 100; //update user's scroll position
 }
 
 // runs updatePositions on scroll
@@ -528,7 +592,7 @@ window.addEventListener('scroll', updatePositions);
 document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
-  for (var i = 0; i < TOTALPIZZA; i++) {
+  for (var i = 0; i < TOTAL_PIZZA; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
@@ -541,9 +605,11 @@ document.addEventListener('DOMContentLoaded', function() {
   updatePositions();
 });
 
-var TOTALPIZZA = 32;
-var scrollLocation = 0;
-var pizzaBox = document.getElementsByClassName("randomPizzaContainer");
-var pizzaBoxSize = pizzaBox.length;
-var windowWidth = document.getElementById("randomPizzas").offsetWidth;
-var pizzaWidth = pizzaBox[0].offsetWidth;
+//Global variables used to reduce DOM calls and increase performance
+
+var TOTAL_PIZZA = 32, //Total number of visible moving pizzas
+    PIZZA_WIDTH = 390; //offsetWidth property value of the elements in pizzaBox array
+    OLD_SIZE = .333; //Discovered this value after examining console logs to find patterns
+    PIZZA_BOX_SIZE = 100, //Stores the length so that we don't have to run the .length method each iteration (Same as doing pizzaBox.length)
+    scrollLocation = 0, //Replaces the need to do a body.scrollTop DOM call since the page always loads from the top position of zero
+    pizzaBox = document.getElementsByClassName("randomPizzaContainer"); //One DOM call to get all the pizzas that get re-sized
