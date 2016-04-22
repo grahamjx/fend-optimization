@@ -10,8 +10,20 @@
     <!-- Hmm, what is the impact of web fonts on speed? Measure it... -->
     <!-- <link href="//fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet"> -->
 
+    <style media="screen">
+    @font-face {
+      font-family: 'Open Sans';
+      src: url(http://fonts.gstatic.com/s/opensans/v13/K88pR3goAWT7BTt32Z01mxJtnKITppOI_IvcXXDNrsc.woff2) format('woff2');
+    }
+
+    @media only screen and (max-width: 480px) {
+      body { font-size: 12px;}
+      header p { padding-left: 4.5em;}
+    }
+    </style>
+
+    <link href="css/style.css" rel="stylesheet" inline>
     <!-- build:css -->
-    <link href="css/style.css" rel="stylesheet">
     <link href="css/print.css" rel="stylesheet">
     <!-- endbuild -->
 

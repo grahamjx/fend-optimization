@@ -5,7 +5,8 @@ var gulp = require('gulp'),
     csso = require('gulp-csso'),
     htmlmin = require('gulp-htmlmin')
     replace = require('gulp-html-replace')
-    rename = require('gulp-rename');
+    rename = require('gulp-rename'),
+    inlinesource = require('gulp-inline-source'),
     site = '';
 
 gulp.task('build', ['images','scripts', 'styles','html']);
@@ -61,6 +62,7 @@ gulp.task('styles', function(){
 
 gulp.task('html', function(){
   gulp.src('src/*.html')
+    .pipe(inlinesource())
     .pipe(replace({
       'css': '<link rel="stylesheet" href="css/print.min.css"media="print">',
       'js': {
