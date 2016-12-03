@@ -8,7 +8,7 @@ This project uses gulp to build the website, host it and provided an external li
 1. [Install Node.js] (https://nodejs.org/en/download/)
 2. Clone the repository
       
-    `$ git clone https://github.com/slkcoin/FEND-optimization`
+    `$ git clone https://github.com/grahamjx/fend-optimization`
 
 3. Navigate to the project folder and run npm install
   
